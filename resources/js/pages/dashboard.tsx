@@ -1,36 +1,52 @@
-import { Head } from '@inertiajs/react';
-import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
-import AppLayout from '@/layouts/app-layout';
-import type { BreadcrumbItem } from '@/types';
-import { dashboard } from '@/routes';
+import { useForm } from '@inertiajs/react'
+import { FormEvent } from 'react'
+import {route} from 'ziggy-js'
 
-const breadcrumbs: BreadcrumbItem[] = [
-    {
-        title: 'Dashboard',
-        href: dashboard().url,
-    },
-];
+interface FormData {
+    resume: File | null
+}
 
 export default function Dashboard() {
+    const { data, setData, post, processing, errors } = useForm<FormData>({
+        resume: null,
+    })
+
+    console.log(route('resumes.store'));
+    const submit = (e: FormEvent<HTMLFormElement>) => {
+        e.preventDefault()
+        post(route('resumes.store'), {
+            forceFormData: true,
+        })
+    }
+
     return (
-        <AppLayout breadcrumbs={breadcrumbs}>
-            <Head title="Dashboard" />
-            <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
-                <div className="grid auto-rows-min gap-4 md:grid-cols-3">
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+        <div className="p-6">
+            <h1 className="text-xl font-bold mb-4">Upload File</h1>
+
+            <form onSubmit={submit}>
+                <input
+                    type="file"
+                    onChange={(e) => {
+                        if (e.target.files) {
+                            setData('resume', e.target.files[0])
+                        }
+                    }}
+                />
+
+                {errors.resume && (
+                    <div className="text-red-500 mt-2">
+                        {errors.resume}
                     </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                    <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
-                        <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                    </div>
-                </div>
-                <div className="relative min-h-[100vh] flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
-                    <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
-                </div>
-            </div>
-        </AppLayout>
-    );
+                )}
+
+                <button
+                    type="submit"
+                    disabled={processing}
+                    className="mt-4 px-4 py-2 bg-black text-white"
+                >
+                    {processing ? 'Uploading...' : 'Upload'}
+                </button>
+            </form>
+        </div>
+    )
 }

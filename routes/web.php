@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ResumeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use Laravel\Fortify\Features;
@@ -10,8 +11,7 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-Route::get('dashboard', function () {
-    return Inertia::render('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
-require __DIR__.'/settings.php';
+Route::middleware(['auth'])->group(function () {
+    Route::get('/dashboard', [ResumeController::class, 'index'])->name('dashboard');
+    Route::post('/resumes', [ResumeController::class, 'store'])->name('resumes.store');
+});
